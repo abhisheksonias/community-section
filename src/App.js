@@ -1,23 +1,53 @@
-import logo from './logo.svg';
+import React, { useState } from 'react';
+import PostList from './Components/PostList';
 import './App.css';
 
+let id = 1;
+
+function finalid()
+{
+  id++;
+}
+
+function SendData(post)
+{
+  fetch('https://sleepy-buck-eloquent.lemme.cloud/api/1a8d9aec-1873-4a28-b8a5-19df7cc561c2', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'oat_MjE4OQ.SnhXdnFjRjVaTWlPUTdreVNsTTIyQzVDVWRiX05yT1M0elFsRlhEcDI4MTc2OTk3NDI',
+    },
+    body: JSON.stringify({
+      content : post,
+      id : id
+    }),
+  });
+}
+
 function App() {
+  const [posts, setPosts] = useState([]);
+  
+  const addPost = (content) => {
+    const newPost = { id: Date.now(), content, likes: 0 };
+    setPosts([newPost, ...posts]);
+  };
+  function poststory(content)
+  {
+    SendData(content);
+    addPost(content);
+    finalid();
+  }
+  
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app">
+      <h1>Community Stories</h1>
+      <div className="post-form">
+        <textarea id="postContent" placeholder="What's on your mind?" />
+        <button onClick={() => poststory(document.getElementById('postContent').value)}>
+          Post Story
+        </button>
+      </div>
+      <PostList posts={posts} setPosts={setPosts} />
     </div>
   );
 }
