@@ -2,51 +2,44 @@ import React, { useState } from 'react';
 import PostList from './Components/PostList';
 import './App.css';
 
-let id = 1;
-
-function finalid()
-{
-  id++;
-}
-
-function SendData(post)
-{
-  fetch('https://sleepy-buck-eloquent.lemme.cloud/api/1a8d9aec-1873-4a28-b8a5-19df7cc561c2', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'oat_MjE4OQ.SnhXdnFjRjVaTWlPUTdreVNsTTIyQzVDVWRiX05yT1M0elFsRlhEcDI4MTc2OTk3NDI',
-    },
-    body: JSON.stringify({
-      content : post,
-      id : id
-    }),
-  });
-}
-
 function App() {
-  const [posts, setPosts] = useState([]);
-  
-  const addPost = (content) => {
-    const newPost = { id: Date.now(), content, likes: 0 };
-    setPosts([newPost, ...posts]);
+  const [posts, setPosts] = useState([
+    { _id: '1', content: 'This is the first post!', likes: 10, liked: false, comments: [] },
+    { _id: '2', content: 'Here is another interesting post!', likes: 5, liked: false, comments: [] },
+  ]);
+
+  const [newPostContent, setNewPostContent] = useState(''); // State for tracking new post content
+
+  // Function to add a new post
+  const postStory = () => {
+    if (newPostContent.trim() !== '') {
+      const newPost = {
+        _id: Date.now().toString(),  // Generate a unique ID for the new post
+        content: newPostContent,
+        likes: 0,
+        liked: false,
+        comments: [],
+      };
+
+      setPosts([newPost, ...posts]);  // Add the new post to the beginning of the list
+      setNewPostContent('');  // Clear the input field after posting
+    }
   };
-  function poststory(content)
-  {
-    SendData(content);
-    addPost(content);
-    finalid();
-  }
-  
+
   return (
     <div className="app">
       <h1>Community Stories</h1>
       <div className="post-form">
-        <textarea id="postContent" placeholder="What's on your mind?" />
-        <button onClick={() => poststory(document.getElementById('postContent').value)}>
-          Post Story
-        </button>
+        {/* Controlled textarea to capture new post content */}
+        <textarea
+          value={newPostContent}
+          onChange={(e) => setNewPostContent(e.target.value)}
+          placeholder="What's on your mind?"
+        />
+        <button onClick={postStory}>Post Story</button>
       </div>
+      
+      {/* Pass posts and setPosts as props to PostList */}
       <PostList posts={posts} setPosts={setPosts} />
     </div>
   );

@@ -1,29 +1,43 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart } from '@fortawesome/free-solid-svg-icons';
+import CommentSection from './CommentSection';
 
 function Post({ post, setPosts }) {
-  const [likeCount, setLikeCount] = useState(post.likes);
-  const [liked, setLiked] = useState(post.likes > 0); // Initial state based on whether post is liked
+  const [liked, setLiked] = useState(post.liked || false);
 
   const handleLike = () => {
-    const newLikeCount = liked ? likeCount - 1 : likeCount + 1;
-    setLikeCount(newLikeCount);
-    setLiked(!liked);
-    setPosts(prev => prev.map(p => p.id === post.id ? { ...p, likes: newLikeCount } : p));
+    // Toggle the like state locally
+    setPosts((prev) =>
+      prev.map((p) =>
+        p._id === post._id
+          ? {
+              ...p,
+              likes: liked ? p.likes - 1 : p.likes + 1, // Adjust likes count
+              liked: !liked, // Toggle liked status
+            }
+          : p
+      )
+    );
+    setLiked(!liked); // Toggle the local like state
   };
 
   return (
     <div className="post">
-      <p><strong>{post.content}</strong></p>
+      <div className="post-header">
+        <div className="profile-pic"></div>
+        <p><strong>{post.content}</strong></p>
+      </div>
       <div className="post-actions">
         <FontAwesomeIcon
           icon={faHeart}
-          className={`heart-icon2 ${liked ? 'liked' : ''}`}
+          className={`heart-icon ${liked ? 'liked' : ''}`}
           onClick={handleLike}
         />{' '}
-        ({likeCount})
+        ({post.likes})
       </div>
+
+      <CommentSection comments={post.comments} postId={post._id} setPosts={setPosts} />
     </div>
   );
 }

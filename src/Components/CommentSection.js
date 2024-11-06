@@ -1,56 +1,83 @@
-// import React, { useState } from 'react';
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// import { faHeart } from '@fortawesome/free-solid-svg-icons';
+import React, { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHeart } from '@fortawesome/free-solid-svg-icons';
 
-// function CommentSection({ comments, setComments, postId, setPosts }) {
-//   const [commentText, setCommentText] = useState('');
+function CommentSection({ comments, postId, setPosts }) {
+  const [commentText, setCommentText] = useState('');
+  
+  // Handle adding a comment locally
+  const handleAddComment = () => {
+    if (commentText.trim() !== '') {
+      const newComment = {
+        _id: Date.now().toString(),  // Simulating a unique ID for the comment
+        text: commentText,
+        likes: 0,
+        liked: false,
+      };
 
-//   const addComment = () => {
-//     const newComment = { id: Date.now(), text: commentText, likes: 0 }; // Initialize likes to 0
-//     setComments([...comments, newComment]);
-//     setCommentText('');
-//     setPosts(prev => prev.map(p => p.id === postId ? { ...p, comments: [...p.comments, newComment] } : p));
-//   };
+      // Update the posts state to add the new comment
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post._id === postId
+            ? { ...post, comments: [...post.comments, newComment] }
+            : post
+        )
+      );
+      setCommentText('');  // Clear the comment input field
+    }
+  };
 
-//   const likeComment = (commentId) => {
-//     const updatedComments = comments.map(comment =>
-//       comment.id === commentId
-//         ? { ...comment, likes: comment.likes < 1 ? comment.likes + 1 : comment.likes - 1 } // Toggle like
-//         : comment
-//     );
-//     setComments(updatedComments);
-//     setPosts(prev =>
-//       prev.map(p => p.id === postId ? { ...p, comments: updatedComments } : p)
-//     );
-//   };
+  // Handle liking a comment locally
+  const handleCommentLike = (commentId) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post._id === postId
+          ? {
+              ...post,
+              comments: post.comments.map((comment) =>
+                comment._id === commentId
+                  ? {
+                      ...comment,
+                      likes: comment.liked ? comment.likes - 1 : comment.likes + 1,
+                      liked: !comment.liked,
+                    }
+                  : comment
+              ),
+            }
+          : post
+      )
+    );
+  };
 
-//   return (
-//     <div className="comment-section">
-//       <h4>Comments</h4>
-//       <div className="comments">
-//         {comments.length ? comments.map(comment => (
-//           <div key={comment.id} className="comment">
-//             <p>{comment.text}</p>
-//             <FontAwesomeIcon
-//               icon={faHeart}
-//               className={`heart-icon ${comment.likes > 0 ? 'liked' : ''}`}
-//               onClick={() => likeComment(comment.id)}
-//             />{' '}
-//             ({comment.likes}) {/* Display like count */}
-//           </div>
-//         )) : <p>No comments yet.</p>}
-//       </div>
-//       <div className="add-comment">
-//         <input
-//           type="text"
-//           placeholder="Write a comment..."
-//           value={commentText}
-//           onChange={(e) => setCommentText(e.target.value)}
-//         />
-//         <button onClick={addComment}>Comment</button>
-//       </div>
-//     </div>
-//   );
-// }
+  return (
+    <div className="comment-section">
+      <div className="comment-form">
+        <input
+          type="text"
+          value={commentText}
+          onChange={(e) => setCommentText(e.target.value)}
+          placeholder="Add a comment..."
+        />
+        <button onClick={handleAddComment}>Post</button>
+      </div>
 
-// export default CommentSection;
+      <div className="comments">
+        {comments.map((comment) => (
+          <div key={comment._id} className="comment">
+            <p>{comment.text}</p>
+            <div className="comment-actions">
+              <FontAwesomeIcon
+                icon={faHeart}
+                className={`heart-icon ${comment.liked ? 'liked' : ''}`}
+                onClick={() => handleCommentLike(comment._id)}
+              />{' '}
+              ({comment.likes})
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default CommentSection;
